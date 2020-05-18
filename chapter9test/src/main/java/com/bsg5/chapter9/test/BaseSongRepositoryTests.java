@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -63,7 +64,8 @@ public abstract class BaseSongRepositoryTests<
             Optional<S> songQuery = songRepository
                 .findByArtistIdAndNameIgnoreCase(artist.getId(),
                     songTitle);
-            if (songQuery.isEmpty()) {
+//             if (songQuery.isEmpty()) {//no isEmpty() method for Optional<T> object
+                if(!songQuery.isPresent()){
                 S song = createSong(artist, songTitle);
                 song.setVotes(votes);
                 songRepository.save(song);
@@ -72,10 +74,10 @@ public abstract class BaseSongRepositoryTests<
     }
 
     @Test
-    public void testOperations() {
+    public void testOperations() throws SQLException{//declare Exception
         A artist = artistRepository
             .findByNameIgnoreCase("therapy zeppelin")
-            .orElseThrow();
+            .orElseThrow(() -> new SQLException("NO ARTISTS FOUND!") );//orElseThrow(Supplier<X extends Throwable> sup)
         List<S> songs = songRepository
             .findByArtistIdAndNameLikeIgnoreCaseOrderByNameDesc(
                 artist.getId(),
